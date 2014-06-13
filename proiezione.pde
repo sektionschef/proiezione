@@ -1,6 +1,9 @@
 //Libraries
 import deadpixel.keystone.*; //keystone library
+import processing.serial.*; //arduino
+import cc.arduino.*; //arduino
 
+//variable exception here
 //int[] element_names = new int[17]; // create array with element ids of svg
 int element_count = 17;
 
@@ -8,6 +11,7 @@ int element_count = 17;
 //Objects
 Keystone ks; //keystone
 CornerPinSurface surface; //keystone
+Arduino arduino;
 Table scheme; //table, load csv
 
 PGraphics offscreen;
@@ -19,8 +23,9 @@ PShape[] element = new PShape[element_count]; //declare them all at once - Achtu
 
 
 //variables
-String svg_path = "canvas.svg"; //path to svg
+int buttonPin = 2; //arduino read pin
 int sau; //arduino switch
+String svg_path = "canvas.svg"; //path to svg
 int surp = 0; //increase of colour
 int[] hue = new int[element_count]; //array for colour levles
 
@@ -32,6 +37,11 @@ void setup() {
   ks = new Keystone(this);
   surface = ks.createCornerPinSurface(500, 500, 20);
   
+  //Arduino Setup
+  //println(Arduino.list());
+  arduino = new Arduino(this, Arduino.list()[0], 57600);
+  arduino.pinMode(buttonPin, Arduino.INPUT);
+    
   colorMode(HSB); //change the color mode, so the whole color change thing is easier
 
   // We need an offscreen buffer to draw the surface we
@@ -56,7 +66,7 @@ void setup() {
 ///////////////////////////////// DRAW ////////////////////////////////
 //
 void draw() {
-  //sau = arduino.digitalRead(buttonPin);
+  sau = arduino.digitalRead(buttonPin);
   background(0);
   
   TableRow axel_row = scheme.getRow(surp%scheme.getRowCount()); //initialize a single row manually chosen, use the modulo to restrict the surp not exceeding the row count
@@ -90,6 +100,13 @@ void draw() {
  
   // render the scene, transformed using the corner pin surface
   surface.render(offscreen);    
+  
+    //ARDUINO BUTTON AS TRIGGER
+  if (sau == 1) {  // when the button is pushed
+          surp+=20;   //...set the color to black
+          println(surp);
+  }
+  
 }
 
 
