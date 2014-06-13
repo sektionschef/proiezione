@@ -1,0 +1,15 @@
+api_saugung/google_export/
+api_saugung/rtm_export/
+api_saugung/toggl_export/
+bmd_input/
+Report\ Archiv/
+tex_files/
+Errorlog/
+
+## filetypes
+*.csv
+*.pdf
+*.json
+*.xls
+*.xlsx
+*.ods
