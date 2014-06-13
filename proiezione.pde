@@ -24,7 +24,8 @@ PShape[] element = new PShape[element_count]; //declare them all at once - Achtu
 
 //variables
 int buttonPin = 2; //arduino read pin
-int sau; //arduino switch
+int buttonState; //arduino switch
+int lastButtonState = 0; //last moment button state
 String svg_path = "canvas.svg"; //path to svg
 int surp = 0; //increase of colour
 int[] hue = new int[element_count]; //array for colour levles
@@ -66,7 +67,7 @@ void setup() {
 ///////////////////////////////// DRAW ////////////////////////////////
 //
 void draw() {
-  sau = arduino.digitalRead(buttonPin);
+  buttonState = arduino.digitalRead(buttonPin);
   background(0);
   
   TableRow axel_row = scheme.getRow(surp%scheme.getRowCount()); //initialize a single row manually chosen, use the modulo to restrict the surp not exceeding the row count
@@ -101,11 +102,29 @@ void draw() {
   // render the scene, transformed using the corner pin surface
   surface.render(offscreen);    
   
+  
+  /*
     //ARDUINO BUTTON AS TRIGGER
-  if (sau == 1) {  // when the button is pushed
-          surp+=20;   //...set the color to black
+  if (buttonState == 1) {  // when the button is pushed
+          surp+=20;  
           println(surp);
   }
+  */
+  
+  
+  // compare the buttonState to its previous state
+  if (buttonState != lastButtonState) {
+    // if the state has changed, increment the counter
+    if (buttonState == 1) {
+      // if the current state is 1 then the button
+      // wend from off to on:
+      println("on");
+    }
+  }
+  
+  // save the current state as the last state, 
+  //for next time through the loop
+  lastButtonState = buttonState;
   
 }
 
