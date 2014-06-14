@@ -1,4 +1,20 @@
-//Libraries
+
+
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf8">
+    <title>Get me the shit</title>
+    <script src="processing-js-1.4.8/processing.js"></script>
+  </head>
+  <body>
+    <h1>Go, Joe</h1>
+    <p>My first paragraph.</p>
+    <!-- <canvas data-processing-sources="proiezione.pde"></canvas> -->
+    
+    <script type="text/processing">
+      
+      //Libraries
 import deadpixel.keystone.*; //keystone library
 import processing.serial.*; //arduino
 import cc.arduino.*; //arduino
@@ -36,7 +52,7 @@ int[] hue = new int[element_count]; //array for colour levles
 void setup() {
   size(500,500,P3D); //P3D important for keystone, since it relies on texture mapping to deform
   ks = new Keystone(this);
-  surface = ks.createCornerPinSurface(500, 500, 20); //height, width, distance grid
+  surface = ks.createCornerPinSurface(500, 500, 20);
   
   //Arduino Setup
   //println(Arduino.list());
@@ -91,13 +107,12 @@ void draw() {
   // surface from your screen. 
   PVector surfaceMouse = surface.getTransformedMouse();
   
-  // Draw the scene, offscreen - mouse pointer
-  /*
+  // Draw the scene, offscreen
   offscreen.ellipse(surfaceMouse.x, surfaceMouse.y, 75, 75);
+ 
   offscreen.noStroke(); 
-  offscreen.fill(125,141,212);
- */
-  
+  offscreen.fill(125,141,212); 
+
   offscreen.endDraw();
  
   // render the scene, transformed using the corner pin surface
@@ -131,12 +146,10 @@ void draw() {
 
 
 // MOUSE INSTEAD OF ARDUINO
-/*
 void mousePressed(){ // pressing the mouse
   surp+=1; 
   //println(surp); 
 }
-*/
 
 void keyPressed() { //function for keystone
   switch(key) {
@@ -159,3 +172,9 @@ void keyPressed() { //function for keystone
 }
 
 
+      
+    </script>
+    <canvas></canvas>
+    
+  </body>
+</html>
