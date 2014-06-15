@@ -29,12 +29,13 @@ int lastButtonState = 0; //last moment button state
 String svg_path = "canvas.svg"; //path to svg
 int surp = 0; //increase of colour
 int[] hue = new int[element_count]; //array for colour levles
+int whiteout = 150; //more brightness for the whole image
 
 //
 ///////////////////////////////// SETUP ////////////////////////////////
 //
 void setup() {
-  size(500,500,P3D); //P3D important for keystone, since it relies on texture mapping to deform
+  size(displayWidth, displayHeight,P3D); //P3D important for keystone, since it relies on texture mapping to deform
   ks = new Keystone(this);
   surface = ks.createCornerPinSurface(500, 500, 20); //height, width, distance grid
   
@@ -50,7 +51,7 @@ void setup() {
     // note that we're matching the resolution of the
     // CornerPinSurface.
     // (The offscreen buffer can be P2D or P3D)
-  offscreen = createGraphics(500, 500, P3D);
+  offscreen = createGraphics(displayWidth, displayHeight, P3D);
     
   //get svg elements
   canvas = loadShape( svg_path ); //load the svg
@@ -72,8 +73,8 @@ void draw() {
   
   TableRow axel_row = scheme.getRow(surp%scheme.getRowCount()); //initialize a single row manually chosen, use the modulo to restrict the surp not exceeding the row count
     //println(axel_row); //debug
-  for (int i = 0; i < element_count; i++) { //for each element
-    hue[i] = axel_row.getInt(i); //get value for each element and write it in an array
+  for (int i = 0; i < element_count; i++) { //for each element 
+    hue[i] = unhex("ff"+axel_row.getString(i)); //get value for each element and write it in an array; getSting for unhexing; mode is ARGB! so put "ff in front for full colour (in format "ff"+"2d495e") 
     //println(hue[i]); //debug
   }
   
@@ -81,10 +82,16 @@ void draw() {
   
   for (int i = 0; i < element_count; i++) {           
       element[i].disableStyle();
-      fill((hue[i]), 99, 188); 
-      noStroke(); 
-      shape( element[i], 0 ,0); //552px keine Ahnung wieso - wahrscheinlich beim Verkleinern von 1000 auf 500; bei offscreen (keystoning) benötigt man 0 statt -552px auf y)
+      offscreen.fill(hue[i]);
+      offscreen.noStroke(); 
+      offscreen.shape( element[i], 0 ,0); //552px Abweichung keine Ahnung wieso - wahrscheinlich beim Verkleinern von 1000 auf 500; bei offscreen (keystoning) benötigt man 0 statt -552px auf y)
   }  
+  
+  // add a white rectengular for softening the colours in total, transparency value = whiteout
+  offscreen.fill(255,255,255,whiteout);
+  offscreen.noStroke();
+  offscreen.rect(0,0,500,500);
+  
   
   // Convert the mouse coordinate into surface coordinates
   // this will allow you to use mouse events inside the 
