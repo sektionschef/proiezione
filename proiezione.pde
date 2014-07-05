@@ -3,10 +3,21 @@ import deadpixel.keystone.*; //keystone library
 import processing.serial.*; //arduino
 import cc.arduino.*; //arduino
 
-//variable exception here
-//int[] element_names = new int[17]; // create array with element ids of svg
-int element_count = 17;
+//variables
+int buttonPin = 2; //arduino read pin
+int buttonState; //arduino switch
+int lastButtonState = 0; //last moment button state, needed for the swicht
 
+String svg_path = "canvas_sketch_postpainting.svg"; //path to svg of canvas
+int element_count = 22;// number of elements in svg, mind that the loop starts at 0
+int width = 600; //width of canvas - 120*5
+int height = 400; //height of canvas - 80*5
+
+String table_path = "scheme.csv"; //path to table with colors
+int surp = 0; //starting line of color csv table
+//int[] element_names = new int[17]; // create array with element ids of svg
+int[] hue = new int[element_count]; //array for colour levles
+int whiteout = 100; //0-255 more brightness for the whole image
 
 //Objects
 Keystone ks; //keystone
@@ -22,29 +33,20 @@ PShape canvas;
 PShape[] element = new PShape[element_count]; //declare them all at once - Achtung 
 
 
-//variables
-int buttonPin = 2; //arduino read pin
-int buttonState; //arduino switch
-int lastButtonState = 0; //last moment button state
-String svg_path = "canvas.svg"; //path to svg
-int surp = 0; //increase of colour
-int[] hue = new int[element_count]; //array for colour levles
-int whiteout = 150; //more brightness for the whole image
-
 //
 ///////////////////////////////// SETUP ////////////////////////////////
 //
 void setup() {
-  size(displayWidth, displayHeight,P3D); //P3D important for keystone, since it relies on texture mapping to deform
+  size(displayWidth, displayHeight,P3D); //P3D important for keystone, since it relies on texture mapping to deform; fill screen
   ks = new Keystone(this);
-  surface = ks.createCornerPinSurface(500, 500, 20); //height, width, distance grid
+  surface = ks.createCornerPinSurface(width, height, 20); //height, width, distance grid
   
   //Arduino Setup
   //println(Arduino.list());
   arduino = new Arduino(this, Arduino.list()[0], 57600);
   arduino.pinMode(buttonPin, Arduino.INPUT);
     
-  colorMode(HSB); //change the color mode, so the whole color change thing is easier
+//  colorMode(HSB); //change the color mode, so the whole color change thing is easier - still needed?
 
   // We need an offscreen buffer to draw the surface we
     // want projected
@@ -58,10 +60,11 @@ void setup() {
 //  rect_a = canvas.getChild("a"); //archive for getting child
   for (int i = 0; i < element_count; i++) { //get all the children at once
       element[i] = canvas.getChild(str(i)); // Initialize each object with the ID of the svg; convert it to string so it is accepted
+      element[i].scale(0.5);// scale, which percentage
   }
   
-  scheme = loadTable("scheme.csv", "header");
-  //println(scheme.getRowCount() + " total rows in table"); //debug, Anzahl Rows
+  scheme = loadTable( table_path, "header");
+  println(scheme.getRowCount() + " total rows in table"); //debug, Anzahl Rows
 }
 
 //
@@ -69,13 +72,13 @@ void setup() {
 //
 void draw() {
   buttonState = arduino.digitalRead(buttonPin);
-  background(0);
+  background(0); //background black, so there is nothing in the projection
   
   TableRow axel_row = scheme.getRow(surp%scheme.getRowCount()); //initialize a single row manually chosen, use the modulo to restrict the surp not exceeding the row count
-    //println(axel_row); //debug
+//    println(axel_row); //debug
   for (int i = 0; i < element_count; i++) { //for each element 
-    hue[i] = unhex("ff"+axel_row.getString(i)); //get value for each element and write it in an array; getSting for unhexing; mode is ARGB! so put "ff in front for full colour (in format "ff"+"2d495e") 
-    //println(hue[i]); //debug
+    hue[i] = unhex("ff"+axel_row.getString(i)); //get value for each element and write it in an array; getString for unhexing; mode is ARGB! so put "ff in front for full colour (in format "ff"+"2d495e") 
+   //println(hue[i]); //debug
   }
   
   offscreen.beginDraw();
@@ -84,13 +87,13 @@ void draw() {
       element[i].disableStyle();
       offscreen.fill(hue[i]);
       offscreen.noStroke(); 
-      offscreen.shape( element[i], 0 ,0); //552px Abweichung keine Ahnung wieso - wahrscheinlich beim Verkleinern von 1000 auf 500; bei offscreen (keystoning) benötigt man 0 statt -552px auf y)
+      offscreen.shape( element[i], 0 ,125); //552, 122 oder 0px deviance, no idea why - probably because of rescaling from 1000 to 500; for offscreen (keystoning) it takes 0 instead of -552px for y)
   }  
   
   // add a white rectengular for softening the colours in total, transparency value = whiteout
   offscreen.fill(255,255,255,whiteout);
   offscreen.noStroke();
-  offscreen.rect(0,0,500,500);
+  offscreen.rect(0,0,width,height);
   
   
   // Convert the mouse coordinate into surface coordinates
@@ -98,7 +101,7 @@ void draw() {
   // surface from your screen. 
   PVector surfaceMouse = surface.getTransformedMouse();
   
-  // Draw the scene, offscreen - mouse pointer
+  // Draw the scene, offscreen - mouse pointer, nor really needed for me
   /*
   offscreen.ellipse(surfaceMouse.x, surfaceMouse.y, 75, 75);
   offscreen.noStroke(); 
@@ -108,17 +111,7 @@ void draw() {
   offscreen.endDraw();
  
   // render the scene, transformed using the corner pin surface
-  surface.render(offscreen);    
-  
-  
-  /*
-    //ARDUINO BUTTON AS TRIGGER
-  if (buttonState == 1) {  // when the button is pushed
-          surp+=20;  
-          println(surp);
-  }
-  */
-  
+  surface.render(offscreen);     
   
   // compare the buttonState to its previous state
   if (buttonState != lastButtonState) {
@@ -126,8 +119,8 @@ void draw() {
     if (buttonState == 1) {
       // if the current state is 1 then the button
       // wend from off to on:
-      surp+=20;
-      println("button pressed");
+      surp+=1;
+      println("button pressed");//debug
     }
   }
   
@@ -162,6 +155,9 @@ void keyPressed() { //function for keystone
     // saves the layout
     ks.save();
     break;
+
+//  case 'w':
+
   }   
 }
 
