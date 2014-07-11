@@ -156,9 +156,17 @@ void keyPressed() { //function for keystone
     ks.save();
     break;
 
-//  case 'w':
-
+  case 'w':
+    whiteout+=10;
+    break;
+  case 'b':
+    whiteout-=10;
+    break;
   }   
 }
 
-
+/*
+void moreWhite {
+      whiteout+=50;
+}
+*/
