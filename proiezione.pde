@@ -6,7 +6,7 @@ import cc.arduino.*; //arduino
 //variables
 int buttonPin = 2; //arduino read pin
 int buttonState; //arduino switch
-int lastButtonState = 0; //last moment button state, needed for the swicht
+int lastButtonState = 0; //last moment button state, needed for the switch
 
 String svg_path = "canvas_sketch_postpainting.svg"; //path to svg of canvas
 int element_count = 22;// number of elements in svg, mind that the loop starts at 0
@@ -157,16 +157,17 @@ void keyPressed() { //function for keystone
     break;
 
   case 'w':
-    whiteout+=10;
+    if (whiteout < 255) {
+      whiteout+=15;
+      println("whiteout: " + whiteout);
+    }
     break;
   case 'b':
-    whiteout-=10;
+    if (whiteout > 0) {
+      whiteout-=15;
+      println("whiteout: " + whiteout);
+    }  
     break;
   }   
 }
 
-/*
-void moreWhite {
-      whiteout+=50;
-}
-*/
