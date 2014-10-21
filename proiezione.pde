@@ -9,6 +9,8 @@ int buttonState; //arduino switch
 int lastButtonState = 0; //last moment button state, needed for the switch
 
 String svg_path = "canvas_sketch_postpainting.svg"; //path to svg of canvas
+int boring = 0; //start hue loop from; first column
+int zone_count = 5; // number of zones in csv
 int element_count = 22;// number of elements in svg, mind that the loop starts at 0
 int width = 600; //width of canvas - 120*5
 int height = 400; //height of canvas - 80*5
@@ -17,7 +19,7 @@ String table_path = "scheme.csv"; //path to table with colors
 int surp = 0; //starting line of color csv table
 //int[] element_names = new int[17]; // create array with element ids of svg
 int[] hue = new int[element_count]; //array for colour levles
-int whiteout = 100; //0-255 more brightness for the whole image
+int whiteout = 0; //0-255 more brightness for the whole image
 
 //Objects
 Keystone ks; //keystone
@@ -76,10 +78,25 @@ void draw() {
   
   TableRow axel_row = scheme.getRow(surp%scheme.getRowCount()); //initialize a single row manually chosen, use the modulo to restrict the surp not exceeding the row count
 //    println(axel_row); //debug
-  for (int i = 0; i < element_count; i++) { //for each element 
-    hue[i] = unhex("ff"+axel_row.getString(i)); //get value for each element and write it in an array; getString for unhexing; mode is ARGB! so put "ff in front for full colour (in format "ff"+"2d495e") 
-   //println(hue[i]); //debug
+ 
+ int[][] zone = { //number of elements for the five zones 
+                     {6,10,16},
+                     {0,3,14,18},
+                     {4,7,9,13,15,17},
+                     {1,8,12,20,21},
+                     {2,5,11,19}  
+                   };
+// println(zone[0]);
+
+  for (int i = 0; i < zone_count; i++) { //loop for the five zones
+    int r = (i+boring)%5; //the color is swapped but the cycle stays between 0 and 5
+    for (int z = 0; z < zone[i].length ; z++) {
+      //println(r);
+      //println(zone[i][z]);    
+      hue[zone[i][z]] = unhex("ff"+axel_row.getString(r)); //get value for each element and write it in an array; getString for unhexing; mode is ARGB! so put "ff in front for full colour (in format "ff"+"2d495e") 
+    }
   }
+
   
   offscreen.beginDraw();
   
@@ -100,13 +117,6 @@ void draw() {
   // this will allow you to use mouse events inside the 
   // surface from your screen. 
   PVector surfaceMouse = surface.getTransformedMouse();
-  
-  // Draw the scene, offscreen - mouse pointer, nor really needed for me
-  /*
-  offscreen.ellipse(surfaceMouse.x, surfaceMouse.y, 75, 75);
-  offscreen.noStroke(); 
-  offscreen.fill(125,141,212);
- */
   
   offscreen.endDraw();
  
@@ -167,6 +177,10 @@ void keyPressed() { //function for keystone
       whiteout-=15;
       println("whiteout: " + whiteout);
     }  
+    break;
+    case 'p':
+    boring+=1;
+    println("oida!");
     break;
   }   
 }
