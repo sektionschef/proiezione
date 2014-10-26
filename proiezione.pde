@@ -15,6 +15,9 @@ int element_count = 22;// number of elements in svg, mind that the loop starts a
 int width = 600; //width of canvas - 120*5
 int height = 400; //height of canvas - 80*5
 
+int time; //time from start, for the delay
+int wait = 10*1000; //milliseconds - delay for changing colours 
+
 String table_path = "scheme.csv"; //path to table with colors
 int surp = 0; //starting line of color csv table
 //int[] element_names = new int[17]; // create array with element ids of svg
@@ -67,6 +70,8 @@ void setup() {
   
   scheme = loadTable( table_path, "header");
   println(scheme.getRowCount() + " total rows in table"); //debug, Anzahl Rows
+
+  time = millis();//store the current time
 }
 
 //
@@ -96,6 +101,11 @@ void draw() {
       hue[zone[i][z]] = unhex("ff"+axel_row.getString(r)); //get value for each element and write it in an array; getString for unhexing; mode is ARGB! so put "ff in front for full colour (in format "ff"+"2d495e") 
     }
   }
+
+
+  println(axel_row.getString(zone_count)); //artist
+  println(axel_row.getString(zone_count+1)); //palette
+  
 
   
   offscreen.beginDraw();
@@ -137,6 +147,15 @@ void draw() {
   // save the current state as the last state, 
   //for next time through the loop
   lastButtonState = buttonState;
+
+  //TIMED COLOR CHANGE
+  if(millis() - time >= wait){ //delay loop
+    println("tick");
+    boring+=1;
+    
+    time = millis();//update the stored time
+  }
+
 }
 
 
@@ -178,9 +197,9 @@ void keyPressed() { //function for keystone
       println("whiteout: " + whiteout);
     }  
     break;
-    case 'p':
-    boring+=1;
-    println("oida!");
+  case 'p':
+    surp+=1;
+    println("p pressed");//debug
     break;
   }   
 }
